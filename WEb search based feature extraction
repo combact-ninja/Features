@@ -60,3 +60,114 @@ Explanation:
     The CountVectorizer is used to extract features from the preprocessed text, limiting the number of features to 1000.
 
     The X variable stores the extracted features as a matrix, and features contains the feature names extracted by the CountVectorizer.
+
+
+
+
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
+
+# Sample data for demonstration
+data = {
+    'sentence': ['I love this product!', 'This product is terrible.', 'Great service!', 'Poor customer support.'],
+    'sentiment': ['positive', 'negative', 'positive', 'negative']
+}
+df = pd.DataFrame(data)
+
+# Feature extraction using CountVectorizer
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(df['sentence']).toarray()
+
+# Define labels
+y = df['sentiment']
+
+# Print the features (words)
+print("Features (words):")
+print(vectorizer.get_feature_names_out())
+
+# Print the feature matrix
+print("\nFeature matrix:")
+print(X)
+
+import re
+from collections import Counter
+
+def preprocess_text(text):
+    # Remove special characters and numbers
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    # Convert to lowercase
+    text = text.lower()
+    return text
+
+def fbfe(sentence):
+    sentence = preprocess_text(sentence)
+    words = sentence.split()
+    # Count the frequency of each word
+    word_freq = Counter(words)
+    return word_freq
+
+# Sample sentence
+sentence = "I love this product and I think it's amazing!"
+
+# Perform Frequency Based Feature Extraction (FBFE)
+features = fbfe(sentence)
+
+print("Features (words) and their frequencies:")
+print(features)
+
+
+
+from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+import re
+
+# Sample data for demonstration
+data = {
+    'sentence': ['I love this product!', 'This product is terrible.', 'Great service!', 'Poor customer support.'],
+    'sentiment': ['positive', 'negative', 'positive', 'negative']
+}
+df = pd.DataFrame(data)
+
+# Define a list of sentiment words
+sentiment_words = ['good', 'bad', 'great', 'terrible', 'love', 'poor', 'excellent', 'awesome']
+
+# Function to preprocess text
+def preprocess_text(text):
+    # Remove special characters and numbers
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    # Convert to lowercase
+    text = text.lower()
+    # Lemmatization
+    lemmatizer = WordNetLemmatizer()
+    text = ' '.join([lemmatizer.lemmatize(word) for word in text.split()])
+    return text
+
+# Preprocess the sentences
+df['clean_sentence'] = df['sentence'].apply(preprocess_text)
+
+# Define custom tokenizer to include sentiment words
+def custom_tokenizer(text):
+    words = text.split()
+    # Include sentiment words
+    words.extend(sentiment_words)
+    return words
+
+# Feature extraction using CountVectorizer with custom tokenizer
+vectorizer = CountVectorizer(tokenizer=custom_tokenizer, stop_words=stopwords.words('english'))
+X = vectorizer.fit_transform(df['clean_sentence']).toarray()
+
+# Define labels
+y = df['sentiment']
+
+# Print the features (words)
+print("Features (words):")
+print(vectorizer.get_feature_names_out())
+
+# Print the feature matrix
+print("\nFeature matrix:")
+print(X)
+
