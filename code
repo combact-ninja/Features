@@ -1,0 +1,13 @@
+x = arr[ :7, :]
+x1 = arr[5:7, :]
+y = arr[11: , :]
+z = arr[7: , :]
+
+a= np.random.uniform(0.006, 0.009, (5, 5))
+a= np.sort(a)
+a1 = z + a
+
+b= np.random.uniform(0.006, 0.009, (2, 5))
+b= np.sort(b)
+b1 = x1 + b
+finalarray = np.concatenate((x, b1, y, a1))
