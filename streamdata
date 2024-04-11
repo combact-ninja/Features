@@ -1,0 +1,93 @@
+from kafka import KafkaProducer, KafkaConsumer
+import csv
+import random
+import time
+
+# Initialize Kafka producer
+producer = KafkaProducer(bootstrap_servers='localhost:9092')
+
+# Function to send a message to Kafka topic
+def send_message(topic, message):
+    producer.send(topic, message.encode('utf-8'))
+
+# Function to generate normal streaming data
+def generate_normal_data():
+    return f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}, {random.randint(1, 1000)}, {random.choice(['click', 'view', 'purchase'])}, {'.'.join([str(random.randint(0, 255)) for _ in range(4)])}, {random.choice(['Chrome', 'Firefox', 'Safari', 'Edge'])}, {random.choice(['New York', 'London', 'Tokyo', 'Sydney'])}"
+
+# Function to generate DOS attack data
+def generate_dos_attack_data():
+    return f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}, {random.choice([None, None, None, random.randint(1, 1000)])}, {random.choice(['', '', '', ''])}, {'.'.join([str(random.randint(0, 255)) for _ in range(4)])}, {random.choice(['', '', '', ''])}, {random.choice(['', '', '', ''])}"
+
+# Write data to CSV file
+def write_to_csv(data, filename):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['timestamp', 'user_id', 'action', 'ip_address', 'browser', 'location'])
+        for row in data:
+            writer.writerow(row.split(','))
+
+# Generate and send 1000 normal streaming data
+normal_data = [generate_normal_data() for _ in range(1000)]
+for data in normal_data:
+    send_message('normal_topic', data)
+
+# Generate and send 1000 DOS attack data
+dos_attack_data = [generate_dos_attack_data() for _ in range(1000)]
+for data in dos_attack_data:
+    send_message('dos_attack_topic', data)
+
+# Consume messages from Kafka topics (you can process or store them as needed)
+consumer = KafkaConsumer('normal_topic', 'dos_attack_topic', bootstrap_servers='localhost:9092', group_id='my-group')
+for message in consumer:
+    print(message.value.decode('utf-8'))
+
+# Write Kafka messages to CSV files (you can modify this part to fit your specific requirements)
+write_to_csv(normal_data, 'normal_data.csv')
+write_to_csv(dos_attack_data, 'dos_attack_data.csv')
+
+
+
+
+# import csv
+# import random
+# import time
+#
+# # Function to generate normal streaming data
+# def generate_normal_data():
+#     return {
+#         'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),
+#         'user_id': random.randint(1, 1000),
+#         'action': random.choice(['click', 'view', 'purchase']),
+#         'ip_address': '{}.{}.{}.{}'.format(*[random.randint(0, 255) for _ in range(4)]),
+#         'browser': random.choice(['Chrome', 'Firefox', 'Safari', 'Edge']),
+#         'location': random.choice(['New York', 'London', 'Tokyo', 'Sydney']),
+#     }
+#
+# # Function to generate DOS attack data
+# def generate_dos_attack_data():
+#     return {
+#         'timestamp': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),
+#         'user_id': random.choice([None, None, None, random.randint(1, 1000)]),  # Increase chance of None to simulate missing data
+#         'action': random.choice(['', '', '', '']),
+#         'ip_address': '{}.{}.{}.{}'.format(*[random.randint(0, 255) for _ in range(4)]),
+#         'browser': random.choice(['', '', '', '']),
+#         'location': random.choice(['', '', '', '']),
+#     }
+#
+# # Write data to CSV file
+# def write_to_csv(data, filename):
+#     with open(filename, mode='w', newline='') as file:
+#         fieldnames = ['timestamp', 'user_id', 'action', 'ip_address', 'browser', 'location']
+#         writer = csv.DictWriter(file, fieldnames=fieldnames)
+#
+#         writer.writeheader()
+#         for row in data:
+#             writer.writerow(row)
+#
+# # Generate and store 1000 normal streaming data
+# normal_data = [generate_normal_data() for _ in range(1000)]
+# write_to_csv(normal_data, 'normal_data.csv')
+#
+# # Generate and store 1000 DOS attack data
+# dos_attack_data = [generate_dos_attack_data() for _ in range(1000)]
+# write_to_csv(dos_attack_data, 'dos_attack_data.csv')
