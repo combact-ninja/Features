@@ -1,0 +1,27 @@
+class WatershedReservoirSampler:
+    def __init__(self, k):
+        self.k = k
+        self.reservoirs = []
+
+    def sample(self, item):
+        if len(self.reservoirs) < self.k:
+            self.reservoirs.append(item)
+        else:
+            idx = random.randint(0, len(self.reservoirs))
+            if idx < self.k:
+                self.reservoirs[idx] = item
+
+    def get_sample(self):
+        return self.reservoirs
+
+# Example usage
+stream = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+k = 3
+sampler = WatershedReservoirSampler(k)
+
+for item in stream:
+    sampler.sample(item)
+
+sampled_items = sampler.get_sample()
+print("Sampled items:", sampled_items)
+
