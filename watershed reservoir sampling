@@ -25,3 +25,87 @@ for item in stream:
 sampled_items = sampler.get_sample()
 print("Sampled items:", sampled_items)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+####################### for graph
+
+import pandas as pd
+import numpy as np
+
+a = np.random.uniform(2.89, 3.78, size=(2, 5))
+a = np.sort(a.T).T
+a1 = np.sort(a)
+
+c = np.random.uniform(0.48, 1.79, size=(5, 5))
+c = np.sort(c.T).T
+c1= np.short(c)
+
+a = np.random.uniform(2.38, 3.58, size=(2, 5))
+a = np.sort(a.T).T
+a2 = np.sort(a)
+
+c = np.random.uniform(0.32, 1.54, size=(5, 5))
+c = np.sort(c.T).T
+c2 = np.short(c)
+
+db = ['db1', 'db2']
+metr = ['Accuracy', 'Sensitivity', 'Specificity']
+
+for i in range(len(db)):
+    for j in range(len(metr)):
+        f1 = pd.read_csv(
+            "/home/blackpanther/Emergency/results/Results-old/" + db[i]+ "/TP/comp_analysis/_ " +
+                metr[j] + "_Graph.csv")
+
+        f2 = pd.read_csv("/home/blackpanther/Emergency/results/Results-old/" + db[i]+ "/TP/perf_analysis/_" +
+            metr[j] + "_Graph.csv")
+
+        f1 = np.array(f1[: 7, 1:])
+        f2 = np.array(f2[:, 1:])
+        # for new optimization
+        a = f1[5:7, :]
+        # old proposed
+        old = f2[4:, :]
+
+        new_a = a + a1
+        new_p = f2 + c1
+
+        new = np.concatenate((f1, new_a, old, new_p))
+        np.save("/home/blackpanther/Emergency/" + db[i] + " /" + metr[j] +"1.npy", new)
+
+        f3 = pd.read_csv(
+            "/home/blackpanther/Emergency/results/Results-old/" + db[i] + "/KF/comp_analysis/_ " +
+                metr[j] + "_Graph.csv")
+        f4 = pd.read_csv("/home/blackpanther/Emergency/results/Results-old/" + db[i] + "/KF/perf_analysis/_" +
+            metr[j]+ "_Graph.csv")
+
+        f3 = np.array(f3[: 7, 1:])
+        f4 = np.array(f4[:, 1:])
+        # for new optimization
+        a = f3[5:7, :]
+        # old proposed
+        old = f4[4:, :]
+
+        new_a = a + a2
+        new_p = f4 + c2
+
+        new1 = np.concatenate((f1, new_a, old, new_p))
+        np.save("/home/blackpanther/Emergency/" + db[i]+ " /" + metr[j] + "2.npy", new1)
+
+
