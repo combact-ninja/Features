@@ -1,0 +1,30 @@
+import os
+import csv
+import xml.etree.ElementTree as ET
+
+folder_path = '/home/blackpanther/PycharmProjects/ALL_files(gui + code)/math imagees remaining'
+csv_file = 'truth_values.csv'
+
+
+# Function to extract truth values from InkML file
+def extract_truth_value(inkml_file):
+          tree = ET.parse(inkml_file)
+          root = tree.getroot()
+          for annotation in root.iter('{http://www.w3.org/2003/InkML}annotation'):
+                    if 'type' in annotation.attrib and annotation.attrib['type'] == 'truth':
+                              return annotation.text.strip()  # Assuming the truth value is a text
+
+
+# Write the filenames and their truth values to a CSV file
+with open(csv_file, mode='w', newline='') as file:
+          writer = csv.writer(file)
+          # Write the header
+          writer.writerow(['Filename', 'Truth Value'])
+
+          for filename in os.listdir(folder_path):
+                    if filename.endswith('.inkml'):
+                              inkml_file = os.path.join(folder_path, filename)
+                              truth_value = extract_truth_value(inkml_file)
+                              writer.writerow([filename, truth_value])
+
+print("Truth values saved to", csv_file)
