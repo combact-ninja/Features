@@ -91,3 +91,65 @@ write_to_csv(dos_attack_data, 'dos_attack_data.csv')
 # # Generate and store 1000 DOS attack data
 # dos_attack_data = [generate_dos_attack_data() for _ in range(1000)]
 # write_to_csv(dos_attack_data, 'dos_attack_data.csv')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from confluent_kafka import Producer
+import csv
+import random
+import time
+# Kafka producer configuration
+conf = {
+    'bootstrap.servers': 'localhost:9092',
+    'client.id': 'python-producer'
+}
+# Kafka topic
+topic = 'user_stream'
+
+# Function to simulate user data generation
+def generate_user_data(user_id):
+    age = random.randint(18, 65)
+    content = f"Content for user {user_id}"
+    stream_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + random.randint(1, 60)))
+    return [user_id, age, content, stream_time, end_time]
+
+# Function to simulate DOS attack flag
+def simulate_dos_attack():
+    return random.choice([True, False])
+
+
+# Initialize Kafka producer
+producer = Producer(**conf)
+# Initialize CSV writer
+with open('user_stream_data.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['user_id', 'age', 'content', 'stream_time', 'end_time', 'dos_attack'])
+
+    # Simulate streaming data and save to CSV
+    for i in range(5):  # Generate data for 100 users
+        user_id = i
+        dos_attack = simulate_dos_attack()
+        data = generate_user_data(user_id) + [dos_attack]
+        writer.writerow(data)
+
+        # Produce message to Kafka topic
+        producer.produce(topic, key=str(user_id), value=','.join(map(str, data)))
+
+        # Introduce a delay to simulate streaming
+        time.sleep(0.1)
+
+# Close Kafka producer
+producer.flush()
+producer.close()
