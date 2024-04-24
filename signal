@@ -1,0 +1,138 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Generate a simple sine wave signal
+fs = 1000  # Sampling frequency
+t = np.arange(0, 1, 1/fs)  # Time vector
+f = 5  # Signal frequency
+x = np.sin(2*np.pi*f*t)  # Sine wave signal
+
+# Modulation parameters
+threshold = 0.5  # Amplitude threshold for AAM
+beta = 1.0  # Scaling factor for AAM
+alpha = 0.5  # Scaling factor for optiphase modulation
+
+# Adaptive Amplitude Modulation
+def adaptive_amplitude_modulation(signal, threshold, beta):
+    modulated_signal = np.zeros_like(signal)
+    for i in range(1, len(signal)):
+        if abs(signal[i]) > threshold:
+            modulated_signal[i] = beta * signal[i]
+        else:
+            modulated_signal[i] = signal[i]
+    return modulated_signal
+
+# Optiphase Modulation
+def optiphase_modulation(signal, alpha):
+    modulated_signal = np.angle(signal) + alpha
+    return np.exp(1j * modulated_signal)
+
+# Apply hybrid modulation
+modulated_signal = optiphase_modulation(adaptive_amplitude_modulation(x, threshold, beta), alpha)
+
+# Plot the original and modulated signals
+plt.figure(figsize=(12, 6))
+plt.plot(t, x, label='Original Signal')
+plt.plot(t, modulated_signal.real, label='Modulated Signal (Real Part)')
+plt.plot(t, modulated_signal.imag, label='Modulated Signal (Imaginary Part)')
+plt.title('Hybrid Adaptive Amplitude and Optiphase Modulation')
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np
+
+def hybrid_modulation(signal, threshold, beta, alpha):
+    # Adaptive Amplitude Modulation
+    modulated_signal = np.where(np.abs(signal) > threshold, beta * signal, signal)
+    
+    # Optiphase Modulation
+    phase_signal = np.angle(modulated_signal)
+    optiphase_modulated_signal = np.exp(1j * (phase_signal + alpha))
+    
+    return optiphase_modulated_signal
+
+# Example usage
+# Create a simple sine wave signal
+fs = 1000  # Sampling frequency
+t = np.arange(0, 1, 1/fs)  # Time vector
+f = 5  # Signal frequency
+x = np.sin(2*np.pi*f*t)  # Sine wave signal
+
+# Modulation parameters
+threshold = 0.5  # Amplitude threshold for AAM
+beta = 1.0  # Scaling factor for AAM
+alpha = np.pi/4  # Phase modulation factor for optiphase modulation
+
+# Apply hybrid modulation
+modulated_signal = hybrid_modulation(x, threshold, beta, alpha)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np
+from scipy.optimize import minimize
+
+# Generate random signal data
+np.random.seed(0)
+signal = np.random.rand(100)
+
+# Objective function to minimize (example: sum of squared differences)
+def objective_function(params):
+    start_idx, end_idx = params
+    block = signal[start_idx:end_idx]
+    target_block = np.ones_like(block) * 0.5  # Example target block (e.g., block with mean 0.5)
+    return np.sum((block - target_block) ** 2)
+
+# Ultrasearch optimizer
+result = minimize(objective_function, x0=[0, 10], bounds=[(0, len(signal)), (0, len(signal))])
+
+# Extract optimal signal block indices
+optimal_start_idx, optimal_end_idx = result.x
+optimal_signal_block = signal[int(optimal_start_idx):int(optimal_end_idx)]
+
+# Output
+print("Optimal signal block indices:", optimal_start_idx, optimal_end_idx)
+print("Optimal signal block:", optimal_signal_block)
