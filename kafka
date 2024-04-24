@@ -1,0 +1,123 @@
+from confluent_kafka import Producer
+
+# Kafka broker address
+bootstrap_servers = 'localhost:9092'
+
+# Create Kafka Producer
+producer = Producer({'bootstrap.servers': bootstrap_servers})
+
+# Produce messages to the 'topic1' topic
+for i in range(1, 6):
+    producer.produce('topic1', f'Message {i}'.encode('utf-8'))
+
+# Flush the producer to send the messages
+producer.flush()
+
+print("Messages produced to topic1")
+
+
+
+
+
+
+
+
+
+
+
+
+
+from confluent_kafka import Consumer, KafkaError
+
+# Create Kafka Consumer
+consumer = Consumer({
+    'bootstrap.servers': bootstrap_servers,
+    'group.id': 'my_consumer_group',
+    'auto.offset.reset': 'earliest'
+})
+
+# Subscribe to the 'topic1' topic
+consumer.subscribe(['topic1'])
+
+# Consume messages from the topic
+try:
+    while True:
+        msg = consumer.poll(timeout=1.0)
+        if msg is None:
+            continue
+        if msg.error():
+            if msg.error().code() == KafkaError._PARTITION_EOF:
+                # End of partition, exit the loop
+                break
+            else:
+                # Other error, print the error message
+                print(f"Consumer error: {msg.error()}")
+                break
+        print(f"Received message: {msg.value().decode('utf-8')}")
+except KeyboardInterrupt:
+    pass
+finally:
+    # Close the consumer
+    consumer.close()
+
+print("Messages consumed from topic1")
+
+
+
+confluent-hub install confluentinc/kafka-connect-datagen:latest
+
+
+
+
+import requests
+
+connector_config = {
+    "name": "datagen-users",
+    "config": {
+        "connector.class": "io.confluent.kafka.connect.datagen.DatagenConnector",
+        "kafka.topic": "topic2",
+        "quickstart": "users",
+        "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter.schemas.enable": "false",
+        "max.interval": 1000,
+        "iterations": 10000000,
+        "tasks.max": "1"
+    }
+}
+
+url = "http://localhost:9021/connectors"
+response = requests.post(url, json=connector_config)
+
+print(response.status_code)
+print(response.text)
+
+
+consumer = Consumer({
+    'bootstrap.servers': bootstrap_servers,
+    'group.id': 'my_consumer_group',
+    'auto.offset.reset': 'earliest'
+})
+
+consumer.subscribe(['topic2'])
+
+try:
+    while True:
+        msg = consumer.poll(timeout=1.0)
+        if msg is None:
+            continue
+        if msg.error():
+            if msg.error().code() == KafkaError._PARTITION_EOF:
+                break
+            else:
+                print(f"Consumer error: {msg.error()}")
+                break
+        print(f"Received message: {msg.value().decode('utf-8')}")
+except KeyboardInterrupt:
+    pass
+finally:
+    consumer.close()
+
+print("Messages consumed from topic2")
+
+ksql-datagen quickstart=users format=avro topic=topic3 maxInterval=100
