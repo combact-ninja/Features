@@ -1,0 +1,26 @@
+import numpy as np
+
+def convert_and_sort_array():
+    # Step 1: Generate a random array x
+    x = np.random.uniform(low=0.01, high=0.98, size=(12, 5))
+
+    # Step 2: Calculate the minimum and maximum values of x
+    x_min = np.min(x)
+    x_max = np.max(x)
+
+    # Step 3: Scale x to the desired range (0.70 to 0.96)
+    desired_min = 0.70786
+    desired_max = 0.96678
+    scaled_x = desired_min + (x - x_min) * (desired_max - desired_min) / (x_max - x_min)
+
+    # Step 4: Clip the scaled values to ensure they do not exceed the maximum range
+    # scaled_x = np.clip(scaled_x, 0.70, 0.96)
+
+    # Step 5: Sort the array
+    sorted_x = np.sort(scaled_x.flatten())
+
+    return sorted_x.reshape(x.shape)
+
+# Example usage
+result = convert_and_sort_array()
+print(result)
